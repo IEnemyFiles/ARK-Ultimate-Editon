@@ -1,0 +1,42 @@
+name: Build APK
+
+on:
+  push:
+    branches:
+      - main  # Trigger the workflow on push to the main branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout repository
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    # Step 2: Set up JDK
+    - name: Setup Java JDK
+      uses: actions/setup-java@v4.6.0
+      with:
+        java-version: '11'  # Java version to set up (can be a specific version or semver)
+        distribution: 'temurin'  # Use 'temurin' instead of 'adoptopenjdk'
+        java-package: 'jdk'  # Package type, default is jdk (you can also specify jre, jdk+fx, etc.)
+        architecture: 'x64'  # Architecture of the JDK (x64 or arm64), default is based on the runner's architecture
+        check-latest: 'true'  # Ensure it checks for the latest available JDK that satisfies the version spec
+
+    # Step 3: Install dependencies (if necessary)
+    - name: Install dependencies
+      run: |
+        ./gradlew clean build  # Adjust this command based on your project setup
+
+    # Step 4: Build APK
+    - name: Build APK
+      run: |
+        ./gradlew assembleRelease  # Adjust this command based on your project setup
+
+    # Step 5: Upload the APK artifact
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: apk
+        path: app/build/outputs/apk/release/app-release.apk  # Adjust the path based on your APK output
